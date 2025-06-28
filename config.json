@@ -1,0 +1,7 @@
+{
+  "main_account": "@yourchannel",
+  "delay_seconds": 5,
+  "channels": [],
+  "groups": [],
+  "active_targets": []
+}
