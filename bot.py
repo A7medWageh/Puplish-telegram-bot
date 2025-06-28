@@ -1,6 +1,7 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 import json, os, time
+import keep_alive  # <-- استدعاء السيرفر
 
 CONFIG_FILE = "config.json"
 
@@ -28,7 +29,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("📝 أرسل الرسالة الآن وسيتم نشرها في الأماكن المحددة.")
     elif query.data == 'manual_targets':
         context.user_data['mode'] = 'manual_targets'
-        await query.edit_message_text("📥 أرسل الآن معرفات القنوات والجروبات اللي عايز أنشر فيها (مثال:\n@ch1 @ch2 -100xxxx)")
+        await query.edit_message_text("📥 أرسل معرفات القنوات أو الجروبات (مثال:\n@ch1 -100xxxx)")
 
 async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     config = load_config()
@@ -38,7 +39,7 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         targets = update.message.text.strip().split()
         config['active_targets'] = targets
         save_config(config)
-        await update.message.reply_text(f"✅ تم حفظ {len(targets)} مكان للنشر.")
+        await update.message.reply_text(f"✅ تم حفظ {len(targets)} مكان.")
     elif mode == 'send_text':
         msg = update.message.text
         delay = config.get('delay_seconds', 5)
@@ -54,6 +55,7 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data.clear()
 
 def main():
+    keep_alive.keep_alive()  # <-- تشغيل السيرفر
     TOKEN = os.getenv("BOT_TOKEN")
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
